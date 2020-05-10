@@ -58,6 +58,7 @@ app.use(passport.session());
 app.use(flash());
 app.use(lusca.xframe("SAMEORIGIN"));
 app.use(lusca.xssProtection(true));
+// here the user is accessible in the vue
 app.use((req, res, next) => {
     res.locals.user = req.user;
     next();
@@ -86,6 +87,7 @@ app.use(
  */
 app.get("/", homeController.index);
 app.get("/login", userController.getLogin);
+app.get("/loginStart", userController.getLoginStart);
 app.post("/login", userController.postLogin);
 app.get("/logout", userController.logout);
 app.get("/forgot", userController.getForgot);

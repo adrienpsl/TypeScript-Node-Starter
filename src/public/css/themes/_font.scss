@@ -1,0 +1,22 @@
+// font:
+@font-face {
+    font-family : "Kawaru";
+    src         : url("../fonts/Kawaru.ttf") format("truetype");
+}
+
+@import url("https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap");
+
+
+* {
+    font-family : "Space Mono", serif;
+    color       : white;
+}
+
+.kawa {
+    font-family : Kawaru, serif;
+    color       : white;
+}
+
+.italic {
+    font-style : italic;
+}

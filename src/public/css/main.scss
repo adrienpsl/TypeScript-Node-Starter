@@ -1,19 +1,32 @@
-@import "themes/default/variables";
+@import "themes/variables";
 
 @import "lib/bootstrap/bootstrap";
-@import "lib/font-awesome/font-awesome";
+//@import "lib/font-awesome/font-awesome";
 
-@import "themes/default/default";
+@import "themes/default";
+
+// my stuff
+@import "pages/home";
+@import "themes/font";
+@import "themes/utils";
+@import "themes/variables";
+
 
 // Scaffolding
 // -------------------------
 
+* {
+  outline: none !important;
+}
+
 html {
   position: relative;
   min-height: 100%;
+  background: $brand-primary;
 }
 
 body {
+  background: $brand-primary;
   padding-top: 80px;
   margin-bottom: 75px;
 }

@@ -1,0 +1,32 @@
+
+.full {
+    height     : 100vh;
+    max-height : 100%;
+}
+
+.dark-background {
+    background : $brand-primary;
+}
+
+.ba-1 {
+    margin-bottom : $size-1;
+}
+
+.ba-2 {
+    margin-bottom : $size-2;
+}
+
+
+.ba-3 {
+    margin-bottom : $size-3;
+}
+
+.ba-4 {
+    margin-bottom : $size-4;
+}
+
+.center-image {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}

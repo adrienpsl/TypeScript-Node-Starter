@@ -10,6 +10,20 @@ import { check, sanitize, validationResult } from "express-validator";
 import "../config/passport";
 
 /**
+ * GET /loginStart
+ * Login page.
+ */
+export const getLoginStart = (req: Request, res: Response) => {
+    console.log("bite")
+    if (req.user) {
+        return res.redirect("/");
+    }
+    res.render("account/loginStart", {
+        title: "Login"
+    });
+};
+
+/**
  * GET /login
  * Login page.
  */
@@ -21,6 +35,8 @@ export const getLogin = (req: Request, res: Response) => {
         title: "Login"
     });
 };
+
+
 
 /**
  * POST /login

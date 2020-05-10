@@ -1,4 +1,4 @@
-extends layout
+extends ../layout
 
 block content
 	.dark-background.row.flex-column.align-content-center.full.justify-content-center
@@ -10,8 +10,8 @@ block content
 			p.text-center.italic And they worked happily everafter
 
 		.row.justify-content-between
-			button.main-button I am from 42
-			button.main-button I am from outside
+			a.main-button(href="/login") I am from 42
+			a.main-button(href="/login") I am from outside
 	.end
 		img(src="images/42-white.svg").center-image
 
