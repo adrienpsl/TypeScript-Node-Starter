@@ -1,17 +1,20 @@
 extends ../layout
 
 block content
-	.dark-background.row.flex-column.align-content-center.full.justify-content-center
+	.dark-background
 
-		.ba-4
-			h1.ba-2.underline.kawa.text-center the
-				br
-				| co-founder boat
-			p.text-center.ba-subtitle And they worked happily everafter
+		.absoluteCenter
+			.ba-4
+				h1.ba-2.underline.kawa.text-center the
+					br
+					| co-founder boat
+				p.text-center.ba-subtitle And they worked happily everafter
 
-		.row.justify-content-between
-			a.main-button(href="/login") I am from 42
-			a.main-button(href="/login") I am from outside
-	.end
+			.row.justify-content-between
+				a.main-button(href="/login") I am from 42
+				a.main-button(href="/login") I am from outside
+
+
+	.bottom-fix
 		img(src="images/42-white.svg").center-image
 

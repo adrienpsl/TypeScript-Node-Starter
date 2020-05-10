@@ -2,32 +2,33 @@ extends ../layout
 
 block content
 
-	.dark-background.row.flex-column.align-content-center.full.justify-content-center
-		.row.flex-column.align-content-center.text-center
-			h3.ba-2 The
-				br
-				| co-founder boat
-			h3 I am from 42
+	.dark-background
+		.absoluteCenter
+			.row.flex-column.align-content-center.text-center
+				h3.ba-2 The
+					br
+					| co-founder boat
+				h3 I am from 42
+
+			form.form-horizontal(method='POST')
+				input(type='hidden', name='_csrf', value=_csrf)
+
+				.form__group.field
+					input#email.form__field(type='input' placeholder='Email' name='email' required)
+					label.form__label(for='email') Email
 
 
+				.form__group.field.ba-3
+					input#password.form__field(type='password' placeholder='password' name='password' required)
+					label.form__label(for='password') Password
 
 
-		form.form-horizontal(method='POST')
-			input(type='hidden', name='_csrf', value=_csrf)
+				div.row.justify-content-center.ba-4
+					button.main-button(type="submit") Let's go
 
-			.form__group.field
-				input#email.form__field(type='input' placeholder='Email' name='email' required)
-				label.form__label(for='email') Email
+				div.row.justify-content-between
+					a.main-button.mainButton--little(href='/forgot') Forgot your password?
+					a.main-button.mainButton--little(href='/signup') Sign Up?
 
-
-			.form__group.field.ba-3
-				input#password.form__field(type='password' placeholder='password' name='password' required)
-				label.form__label(for='password') Password
-
-
-			div.row.justify-content-center.ba-4
-				button.main-button(type="submit") Let's go
-
-			div.row.justify-content-between
-				a.main-button.mainButton--little(href='/forgot') Forgot your password?
-				a.main-button.mainButton--little(href='/signup') Sign Up?
+	.bottom-fix
+		img(src="images/42-white.svg").center-image

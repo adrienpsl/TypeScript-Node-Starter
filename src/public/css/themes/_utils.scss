@@ -9,6 +9,10 @@
     background : $brand-primary;
 }
 
+.white-background {
+    background : white;
+}
+
 .ba-1 {
     margin-bottom : $size-1;
 }
@@ -30,4 +34,18 @@
     display      : block;
     margin-left  : auto;
     margin-right : auto;
+}
+
+.bottom-fix {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.absoluteCenter {
+    position: absolute;
+   top: 45%;
+   left: 50%;
+   transform: translate(-50%, -50%);
 }
