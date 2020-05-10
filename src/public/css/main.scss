@@ -1,15 +1,13 @@
 @import "themes/variables";
 
 @import "lib/bootstrap/bootstrap";
-//@import "lib/font-awesome/font-awesome";
 
 @import "themes/default";
 
 // my stuff
-@import "pages/home";
 @import "themes/font";
 @import "themes/utils";
-@import "themes/variables";
+@import "themes/textInput";
 
 
 // Scaffolding
@@ -27,8 +25,8 @@ html {
 
 body {
   background: $brand-primary;
-  padding-top: 80px;
-  margin-bottom: 75px;
+  //padding-top: 80px;
+  //margin-bottom: 75px;
 }
 
 footer {

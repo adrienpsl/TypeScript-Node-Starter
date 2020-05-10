@@ -4,17 +4,30 @@
 // -------------------------
 
 .main-button {
-  font-family : Kawaru, serif;
-  color: white;
-  border: none;
-  border-bottom: solid white 2px;
-  background: none;
-  cursor: pointer;
+    font-family   : Kawaru, serif;
+    color         : white;
+    border        : none;
+    border-bottom : solid white 2px;
+    background    : none;
+    cursor        : pointer;
 
-  &:hover {
-    color: white;
-    text-decoration: none;
-  }
+    &:hover {
+        color           : white;
+        text-decoration : none;
+    }
+}
+
+.mainButton--little{
+    font-size: $font-2;
+}
+
+
+.form__field:focus {
+}
+
+
+.text-input {
+
 }
 
 

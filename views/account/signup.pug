@@ -1,25 +1,31 @@
 extends ../layout
 
 block content
-  .page-header
-    h3 Sign up
-    hr
-  form.form-horizontal(id='signup-form', method='POST')
-    input(type='hidden', name='_csrf', value=_csrf)
-    .form-group.row.justify-content-md-center
-      label.col-sm-3.col-form-label.text-right.font-weight-bold(for='email') Email
-      .col-sm-7
-        input.form-control(type='email', name='email', id='email', placeholder='Email', autofocus, required)
-    .form-group.row.justify-content-md-center
-      label.col-sm-3.col-form-label.text-right.font-weight-bold(for='password') Password
-      .col-sm-7
-        input.form-control(type='password', name='password', id='password', placeholder='Password', required)
-    .form-group.row.justify-content-md-center
-      label.col-sm-3.col-form-label.text-right.font-weight-bold(for='confirmPassword') Confirm Password
-      .col-sm-7
-        input.form-control(type='password', name='confirmPassword', id='confirmPassword', placeholder='Confirm Password', required)
-    .form-group.row.justify-content-md-center
-      .offset-sm-3.col-sm-7
-        button.btn.btn-success(type='submit')
-          i.fa.fa-user-plus
-          | Signup
+
+	.dark-background.row.flex-column.align-content-center.full.justify-content-center
+		.row.flex-column.align-content-center.text-center
+			h3.ba-2 The
+				br
+				| co-founder boat
+			h3 I am from 42
+
+		form.form-horizontal(id='signup-form', method='POST')
+			input(type='hidden', name='_csrf', value=_csrf)
+
+			.form__group.field
+				input#email.form__field(type='input' placeholder='Email' name='email' autofocus required)
+				label.form__label(for='email') Email
+
+			.form__group.field
+				input#password.form__field(type='password' placeholder='Password' name='password' required)
+				label.form__label(for='password') Password
+
+			.form__group.field.ba-3
+				input#confirmPassword.form__field(type='password' placeholder='Confirm Password' name='confirmPassword' required)
+				label.form__label(for='confirmPassword') Confirm Password
+
+			div.row.justify-content-center.ba-4
+				button.main-button(type="submit") Let's go
+
+			div.row.justify-content-center
+				a.main-button.mainButton--little(href='/loginStart') Sign In?
