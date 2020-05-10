@@ -17,16 +17,46 @@
     }
 }
 
-.mainButton--little{
-    font-size: $font-2;
+.mainButton--little {
+    font-size : $font-2;
 }
 
+.founderForm {
+    display : flex;
 
-.form__field:focus {
-}
+    .left {
+        position     : relative;
+        padding-left : $size-3;
+        padding-top  : 100px;
+        width        : 40% !important;
+        height       : 100vh;
 
+        .bottom {
+            position        : absolute;
+            bottom          : 0;
+            right           : 50%;
+            transform       : translateX(50%);
+            display         : flex;
+            justify-content : space-between;
+            align-items     : center;
+            width           : 80%;
 
-.text-input {
+            p {
+                text-transform : uppercase;
+                font-weight    : bold;
+                margin         : 0;
+            }
+
+            img {
+                width : 140px;
+            }
+        }
+    }
+
+    .right {
+        width  : 60% !important;
+        height : 100vh;
+    }
 
 }
 

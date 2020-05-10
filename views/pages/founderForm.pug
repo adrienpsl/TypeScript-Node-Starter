@@ -1,18 +1,20 @@
 extends ../layout
 
 block content
-	.container.white-background
-		.row
-			.col-4.dark-background
-				p.ba-fatFont 1.
-				p.ba-fatFont tell us a more
-				//img()
-				p.ba-subtitle Fill this so we can help you
 
+	.founderForm
+		.left.dark-background
+			p.ba-fatFont.ba-4 1.
+			p.ba-fatFont.ba-4 tell us
+				br
+				| a more
+			img(src="images/hand.svg").ba-4
+			p.ba-subtitle Fill this so we can help you
 
-				p the co-founder boat
-			//img
+			.bottom
+				p.kawa the co-founder boat
+				img(src="images/42-white.svg")
 
-			.col-8.white-background
-
+		.right.white-background
+			iframe.airtable-embed(src='https://airtable.com/embed/shrXL7BBoPVtuqXm9?backgroundColor=orangeLight' frameborder='0' onmousewheel width='100%' height='100%' style='background: transparent; border: 1px solid #ccc;')
 
