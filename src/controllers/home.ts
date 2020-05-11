@@ -9,3 +9,15 @@ export const index = (req: Request, res: Response) => {
         title: "Home"
     });
 };
+
+
+/**
+ * GET /
+ * Home page.
+ */
+export const test = (req: Request, res: Response) => {
+    console.log(req.params)
+    res.render("pages/founderForm", {
+        title: "Home"
+    });
+};
