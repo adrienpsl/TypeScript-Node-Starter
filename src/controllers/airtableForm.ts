@@ -5,6 +5,8 @@ import { UserDocument, userSchema } from '../models/User';
 //
 //
 
+const User = mongoose.model<UserDocument>( 'User', userSchema );
+
 export const founderForm = ( req: Request, res: Response ) => {
   res.render( 'airtableForm/founderForm', {
     title : 'Founder form'
@@ -82,4 +84,3 @@ export const searchFounder = ( req: Request, res: Response, next: NextFunction )
 
 };
 
-export const User = mongoose.model<UserDocument>( 'User', userSchema );
