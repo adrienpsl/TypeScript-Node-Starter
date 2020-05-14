@@ -14,7 +14,7 @@ import "../config/passport";
  * Login page.
  */
 export const getLoginStart = (req: Request, res: Response) => {
-    console.log("bite")
+    console.log("bite");
     if (req.user) {
         return res.redirect("/");
     }

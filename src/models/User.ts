@@ -8,8 +8,8 @@ export type UserDocument = mongoose.Document & {
     passwordResetToken: string;
     passwordResetExpires: Date;
 
-    founderForm: boolean,
-    startupForm: boolean,
+    founderForm: boolean;
+    startupForm: boolean;
 
     facebook: string;
     tokens: AuthToken[];
