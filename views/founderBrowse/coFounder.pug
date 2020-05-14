@@ -1,7 +1,8 @@
 extends ../layout
 
+
 block content
-	.founderBrowseStart.dark-background
+	.founderBrowseCofounder.dark-background
 
 		.title.text-center
 			h3.kawa The
@@ -13,8 +14,11 @@ block content
 			img(src="images/hand.svg").ba-4
 			img(src="images/hands-2.svg").ba-4
 
+		.white-background.card-container
 
-		.gigaButton
-			a.kawa(href="/searchFounder") startups
-			a.kawa() founders
-			a.kawa() browse all
+			each val in cards
+				.card.dark-background.text-center
+					p.kawa.founder Founder
+					p= val.name
+					a.main-button contact
+
