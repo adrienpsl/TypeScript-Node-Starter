@@ -111,7 +111,9 @@ export const postSignup = async (req: Request, res: Response, next: NextFunction
 
     const user = new User({
         email: req.body.email,
-        password: req.body.password
+        password: req.body.password,
+        founderForm: false,
+        startupForm: false,
     });
 
     User.findOne({ email: req.body.email }, (err, existingUser) => {

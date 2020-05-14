@@ -21,15 +21,44 @@
     font-size : $font-2;
 }
 
+.formDirection {
+    display         : flex;
+    flex-direction  : column;
+    align-items     : center;
+    justify-content : space-around;
+    height          : 100%;
+
+
+    p {
+        color          : $brand-primary;
+        text-transform : uppercase;
+        font-weight    : bold;
+        font-size      : $font-6;
+        width          : 400px;
+        font-family    : Kawaru, serif;
+    }
+
+    div {
+        display : flex;
+    }
+
+    a {
+        cursor: pointer;
+    }
+
+
+}
+
+
 .founderForm {
     display : flex;
+    height  : 100%;
 
     .left {
         position     : relative;
         padding-left : $size-3;
         padding-top  : 100px;
         width        : 40% !important;
-        height       : 100vh;
 
         .bottom {
             position        : absolute;
@@ -55,7 +84,7 @@
 
     .right {
         width  : 60% !important;
-        height : 100vh;
+        height : 100%;
     }
 
 }
