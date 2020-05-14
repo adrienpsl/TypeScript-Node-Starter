@@ -43,10 +43,8 @@
     }
 
     a {
-        cursor: pointer;
+        cursor : pointer;
     }
-
-
 }
 
 
@@ -86,7 +84,27 @@
         width  : 60% !important;
         height : 100%;
     }
+}
 
+
+.founderBrowseStart {
+    height : 100%;
+
+    .hand {
+        margin-top: $size-7;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .gigaButton {
+        a {
+            font-size  : 80px;
+            display    : block;
+            text-align : center;
+            cursor     : pointer;
+        }
+    }
 }
 
 

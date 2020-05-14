@@ -12,7 +12,7 @@ export const index = ( req: Request, res: Response ) => {
     return res.redirect( '/founderForm' );
   }
 
-  res.render( 'home', {
+  res.render( 'founderBrowse/start', {
     title : 'Home'
   } );
 };
