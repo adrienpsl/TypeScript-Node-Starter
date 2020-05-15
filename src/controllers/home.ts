@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response } from 'express';
 
 /**
  * GET /
@@ -7,13 +7,17 @@ import { Request, Response } from "express";
 export const index = ( req: Request, res: Response ) => {
   const { user } = req;
 
-  //@ts-ignore
-  if ( !user.founderForm ) {
-    return res.redirect( "/founderForm" );
+  if ( !user ) {
+    return res.redirect( '/login' );
   }
 
-  res.render( "founderBrowse/start", {
-    title : "Home"
+  //@ts-ignore
+  if ( !user.founderForm ) {
+    return res.redirect( '/founderForm' );
+  }
+
+  res.render( 'founderBrowse/start', {
+    title : 'What do you whant'
   } );
 };
 
@@ -23,7 +27,7 @@ export const index = ( req: Request, res: Response ) => {
  */
 export const test = ( req: Request, res: Response ) => {
   console.log( req.params );
-  res.render( "airtableForm/founderForm", {
-    title : "Home"
+  res.render( 'airtableForm/founderForm', {
+    title : 'Home'
   } );
 };
