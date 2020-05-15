@@ -1,11 +1,15 @@
-import passport from "passport";
-import passportLocal from "passport-local";
-import passportFacebook from "passport-facebook";
-import _ from "lodash";
-
+import passport                          from "passport";
+import passportLocal                     from "passport-local";
+import passportFacebook                  from "passport-facebook";
+import _                                 from "lodash";
+// import passportOAuth                    from "passport-oauth"
 // import { User, UserType } from '../models/User';
-import { User, UserDocument } from "../models/User";
-import { Request, Response, NextFunction } from "express";
+import {User, UserDocument}              from "../models/User";
+import {NextFunction, Request, Response} from "express";
+import {CLIENT_ID, CLIENT_SECRET}        from "../util/secrets";
+import axios                             from "axios";
+
+const OAuth2Strategy = require("passport-oauth").OAuth2Strategy;
 
 const LocalStrategy = passportLocal.Strategy;
 const FacebookStrategy = passportFacebook.Strategy;
@@ -24,18 +28,18 @@ passport.deserializeUser((id, done) => {
 /**
  * Sign in using Email and Password.
  */
-passport.use(new LocalStrategy({ usernameField: "email" }, (email, password, done) => {
-    User.findOne({ email: email.toLowerCase() }, (err, user: any) => {
+passport.use(new LocalStrategy({usernameField: "email"}, (email, password, done) => {
+    User.findOne({email: email.toLowerCase()}, (err, user: any) => {
         if (err) { return done(err); }
         if (!user) {
-            return done(undefined, false, { message: `Email ${email} not found.` });
+            return done(undefined, false, {message: `Email ${email} not found.`});
         }
         user.comparePassword(password, (err: Error, isMatch: boolean) => {
             if (err) { return done(err); }
             if (isMatch) {
                 return done(undefined, user);
             }
-            return done(undefined, false, { message: "Invalid email or password." });
+            return done(undefined, false, {message: "Invalid email or password."});
         });
     });
 }));
@@ -58,52 +62,102 @@ passport.use(new LocalStrategy({ usernameField: "email" }, (email, password, don
 
 
 /**
+ * Sign in with 42.
+ */
+passport.use("42OAuth", new OAuth2Strategy({
+        clientID:         CLIENT_ID,
+        clientSecret:     CLIENT_SECRET,
+        callbackURL:      "http://localhost:3000/42auth",
+        authorizationURL: "https://api.intra.42.fr/oauth/authorize",
+        tokenURL:         "https://api.intra.42.fr/oauth/token"
+    },
+    async function (accessToken, refreshToken, profile, done) {
+
+        try {
+            const getMe = await axios({
+                url:     "https://api.intra.42.fr/v2/me",
+                method:  "GET",
+                headers: {Authorization: `Bearer ${accessToken}`},
+            });
+
+            User.findOne({email: getMe.data.email.toLowerCase()},
+                async (err, existingUser) => {
+                    if (err) {return done(err);}
+
+                    if (existingUser) {
+                        return done(undefined, existingUser);
+                    }
+                    const newUser = new User({
+                        email:  getMe.data.email,
+                        tokens: [{kind: "42OAuth", accessToken: accessToken}]
+                    });
+
+                   await newUser.save((err) => {
+                        if (err) return done(err)
+                        done(err, newUser);
+                        // req.login(newUser)
+                    })
+                });
+            // search if there is user with that:
+
+            // search if that user is :
+
+
+        } catch (e) {
+
+        }
+
+
+        // done();
+    }));
+
+/**
  * Sign in with Facebook.
  */
 passport.use(new FacebookStrategy({
-    clientID: process.env.FACEBOOK_ID,
-    clientSecret: process.env.FACEBOOK_SECRET,
-    callbackURL: "/auth/facebook/callback",
-    profileFields: ["name", "email", "link", "locale", "timezone"],
+    clientID:          process.env.FACEBOOK_ID,
+    clientSecret:      process.env.FACEBOOK_SECRET,
+    callbackURL:       "/auth/facebook/callback",
+    profileFields:     ["name", "email", "link", "locale", "timezone"],
     passReqToCallback: true
 }, (req: any, accessToken, refreshToken, profile, done) => {
     if (req.user) {
-        User.findOne({ facebook: profile.id }, (err, existingUser) => {
+        User.findOne({facebook: profile.id}, (err, existingUser) => {
             if (err) { return done(err); }
             if (existingUser) {
-                req.flash("errors", { msg: "There is already a Facebook account that belongs to you. Sign in with that account or delete it, then link it with your current account." });
+                req.flash("errors", {msg: "There is already a Facebook account that belongs to you. Sign in with that account or delete it, then link it with your current account."});
                 done(err);
             } else {
                 User.findById(req.user.id, (err, user: any) => {
                     if (err) { return done(err); }
                     user.facebook = profile.id;
-                    user.tokens.push({ kind: "facebook", accessToken });
+                    user.tokens.push({kind: "facebook", accessToken});
                     user.profile.name = user.profile.name || `${profile.name.givenName} ${profile.name.familyName}`;
                     user.profile.gender = user.profile.gender || profile._json.gender;
                     user.profile.picture = user.profile.picture || `https://graph.facebook.com/${profile.id}/picture?type=large`;
                     user.save((err: Error) => {
-                        req.flash("info", { msg: "Facebook account has been linked." });
+                        req.flash("info", {msg: "Facebook account has been linked."});
                         done(err, user);
                     });
                 });
             }
         });
     } else {
-        User.findOne({ facebook: profile.id }, (err, existingUser) => {
+        User.findOne({facebook: profile.id}, (err, existingUser) => {
             if (err) { return done(err); }
             if (existingUser) {
                 return done(undefined, existingUser);
             }
-            User.findOne({ email: profile._json.email }, (err, existingEmailUser) => {
+            User.findOne({email: profile._json.email}, (err, existingEmailUser) => {
                 if (err) { return done(err); }
                 if (existingEmailUser) {
-                    req.flash("errors", { msg: "There is already an account using this email address. Sign in to that account and link it with Facebook manually from Account Settings." });
+                    req.flash("errors", {msg: "There is already an account using this email address. Sign in to that account and link it with Facebook manually from Account Settings."});
                     done(err);
                 } else {
                     const user: any = new User();
                     user.email = profile._json.email;
                     user.facebook = profile.id;
-                    user.tokens.push({ kind: "facebook", accessToken });
+                    user.tokens.push({kind: "facebook", accessToken});
                     user.profile.name = `${profile.name.givenName} ${profile.name.familyName}`;
                     user.profile.gender = profile._json.gender;
                     user.profile.picture = `https://graph.facebook.com/${profile.id}/picture?type=large`;
@@ -134,7 +188,7 @@ export const isAuthorized = (req: Request, res: Response, next: NextFunction) =>
     const provider = req.path.split("/").slice(-1)[0];
 
     const user = req.user as UserDocument;
-    if (_.find(user.tokens, { kind: provider })) {
+    if (_.find(user.tokens, {kind: provider})) {
         next();
     } else {
         res.redirect(`/auth/${provider}`);
