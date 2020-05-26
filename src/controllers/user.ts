@@ -12,33 +12,6 @@ import { AuthToken, User, UserDocument } from '../models/User';
 import { CLIENT_ID, CLIENT_SECRET } from '../util/secrets';
 
 /**
- * GET /loginStart
- * Login page.
- */
-export const getLoginStart = ( req: Request, res: Response ) => {
-  console.log( 'bite' );
-  if ( req.user ) {
-    return res.redirect( '/' );
-  }
-  res.render( 'account/loginStart', {
-    title : 'Login'
-  } );
-};
-
-/**
- * GET /login
- * Login page.
- */
-export const getLogin = ( req: Request, res: Response ) => {
-  if ( req.user ) {
-    return res.redirect( '/' );
-  }
-  res.render( 'account/login', {
-    title : 'Login'
-  } );
-};
-
-/**
  * POST /login
  * Sign in using email and password.
  */
@@ -51,8 +24,7 @@ export const postLogin = async ( req: Request, res: Response, next: NextFunction
   const errors = validationResult( req );
 
   if ( !errors.isEmpty() ) {
-    req.flash( 'errors', errors.array() );
-    return res.redirect( '/login' );
+    return res.json( { error : errors.array() } );
   }
 
   passport.authenticate( 'local', ( err: Error, user: UserDocument, info: IVerifyOptions ) => {
@@ -83,12 +55,14 @@ export const logout = ( req: Request, res: Response ) => {
  * Signup page.
  */
 export const getSignup = ( req: Request, res: Response ) => {
-  if ( req.user ) {
-    return res.redirect( '/' );
-  }
-  res.render( 'account/signup', {
-    title : 'Create Account'
-  } );
+  res.sendStatus( 200 );
+  //if ( req.user ) {
+  //  return res.redirect( '/' );
+  //}
+
+  //res.render( 'account/signup', {
+  //  title : 'Create Account'
+  //} );
 };
 
 /**
@@ -106,8 +80,9 @@ export const postSignup = async ( req: Request, res: Response, next: NextFunctio
   const errors = validationResult( req );
 
   if ( !errors.isEmpty() ) {
-    req.flash( 'errors', errors.array() );
-    return res.redirect( '/signup' );
+    res.status( 401 );
+    res.json( errors.array() );
+    return;
   }
 
   const user = new User( {
@@ -118,18 +93,19 @@ export const postSignup = async ( req: Request, res: Response, next: NextFunctio
   } );
 
   User.findOne( { email : req.body.email }, ( err, existingUser ) => {
+
     if ( err ) { return next( err ); }
     if ( existingUser ) {
-      req.flash( 'errors', { msg : 'Account with that email address already exists.' } );
-      return res.redirect( '/signup' );
+      return res.status( 401 ).json( [ { msg : 'User exist' } ] );
     }
+
     user.save( ( err ) => {
       if ( err ) { return next( err ); }
       req.logIn( user, ( err ) => {
         if ( err ) {
           return next( err );
         }
-        res.redirect( '/' );
+        return res.status( 200 ).json( [ { msg : 'User Logged' } ] );
       } );
     } );
   } );

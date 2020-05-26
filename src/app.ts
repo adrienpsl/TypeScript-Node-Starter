@@ -61,7 +61,6 @@ app.use( lusca.xssProtection( true ) );
 // here the user is accessible in the vue
 app.use( ( req, res, next ) => {
   res.locals.user = req.user;
-  console.log( req.user );
   next();
 } );
 
@@ -89,8 +88,8 @@ app.use(
  */
 app.get( '/', homeController.index );
 
-app.get( '/login', userController.getLogin );
-app.get( '/loginStart', userController.getLoginStart );
+//app.get( '/login', userController.getLogin );
+//app.get( '/loginStart', userController.getLoginStart );
 app.post( '/login', userController.postLogin );
 
 app.get( '/logout', userController.logout );
@@ -100,7 +99,7 @@ app.post( '/forgot', userController.postForgot );
 app.get( '/reset/:token', userController.getReset );
 app.post( '/reset/:token', userController.postReset );
 
-app.get( '/signup', userController.getSignup );
+app.get( '/signUp', userController.getSignup );
 app.post( '/signup', userController.postSignup );
 
 app.get( '/contact', contactController.getContact );
