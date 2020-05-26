@@ -24,45 +24,21 @@ export const postLogin = async ( req: Request, res: Response, next: NextFunction
   const errors = validationResult( req );
 
   if ( !errors.isEmpty() ) {
-    return res.json( { error : errors.array() } );
+    return res.status( 401 ).json( errors.array() );
   }
 
   passport.authenticate( 'local', ( err: Error, user: UserDocument, info: IVerifyOptions ) => {
     if ( err ) { return next( err ); }
     if ( !user ) {
-      req.flash( 'errors', { msg : info.message } );
-      return res.redirect( '/login' );
+      console.log( req.body );
+      return res.status( 401 ).json( [ { msg : info.message } ] );
     }
+
     req.logIn( user, ( err ) => {
       if ( err ) { return next( err ); }
-      req.flash( 'success', { msg : 'Success! You are logged in.' } );
-      res.redirect( req.session.returnTo || '/' );
+      res.status( 200 ).json( [ { msg : 'User logged' } ] );
     } );
   } )( req, res, next );
-};
-
-/**
- * GET /logout
- * Log out.
- */
-export const logout = ( req: Request, res: Response ) => {
-  req.logout();
-  res.redirect( '/' );
-};
-
-/**
- * GET /signup
- * Signup page.
- */
-export const getSignup = ( req: Request, res: Response ) => {
-  res.sendStatus( 200 );
-  //if ( req.user ) {
-  //  return res.redirect( '/' );
-  //}
-
-  //res.render( 'account/signup', {
-  //  title : 'Create Account'
-  //} );
 };
 
 /**
@@ -110,6 +86,60 @@ export const postSignup = async ( req: Request, res: Response, next: NextFunctio
     } );
   } );
 };
+
+/**
+ * GET /logout
+ * Log out.
+ */
+export const logout = ( req: Request, res: Response ) => {
+  req.logout();
+  res.redirect( '/' );
+};
+
+export const auth = async ( req: Request, res: Response, next: NextFunction ) => {
+  const code = req.query.code;
+  if ( code ) {
+    try {
+      const getToken = await axios( {
+        url    : 'https://api.intra.42.fr/v2/oauth/token',
+        method : 'POST',
+        params : {
+          grant_type    : 'authorization_code',
+          client_id     : CLIENT_ID,
+          client_secret : CLIENT_SECRET,
+          code,
+          redirect_uri  : 'http://localhost:3000/42auth'
+        }
+      } );
+
+      const { data } = getToken;
+
+      if ( !data ) {
+        throw new Error( 'bad cred' );
+      }
+
+      const getMe = await axios( {
+        url     : 'https://api.intra.42.fr/v2/me',
+        method  : 'GET',
+        headers : { Authorization : `Bearer ${ data.access_token }` }
+      } );
+
+      console.log( getMe.data.email );
+      console.log( req.user );
+      // check if there is an user with that email
+
+    } catch ( e ) {
+      console.log( e );
+    }
+
+  }
+  return res.send( 'ok' );
+};
+
+//
+//
+//
+//
 
 /**
  * GET /account
@@ -384,42 +414,3 @@ export const postForgot = async ( req: Request, res: Response, next: NextFunctio
   } );
 };
 
-export const auth = async ( req: Request, res: Response, next: NextFunction ) => {
-  const code = req.query.code;
-  if ( code ) {
-    try {
-      const getToken = await axios( {
-        url    : 'https://api.intra.42.fr/v2/oauth/token',
-        method : 'POST',
-        params : {
-          grant_type    : 'authorization_code',
-          client_id     : CLIENT_ID,
-          client_secret : CLIENT_SECRET,
-          code,
-          redirect_uri  : 'http://localhost:3000/42auth'
-        }
-      } );
-
-      const { data } = getToken;
-      console.log( data );
-      if ( !data ) {
-        throw new Error( 'bad cred' );
-      }
-
-      const getMe = await axios( {
-        url     : 'https://api.intra.42.fr/v2/me',
-        method  : 'GET',
-        headers : { Authorization : `Bearer ${ data.access_token }` }
-      } );
-
-      console.log( getMe.data.email );
-      console.log( req.user );
-      // check if there is an user with that email
-
-    } catch ( e ) {
-      console.log( e );
-    }
-
-  }
-  return res.send( 'ok' );
-};

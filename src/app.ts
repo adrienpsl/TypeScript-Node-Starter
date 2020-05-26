@@ -54,7 +54,6 @@ app.use( session( {
 } ) );
 app.use( passport.initialize() );
 app.use( passport.session() );
-app.use( flash() );
 app.use( lusca.xframe( 'SAMEORIGIN' ) );
 app.use( lusca.xssProtection( true ) );
 
@@ -99,7 +98,6 @@ app.post( '/forgot', userController.postForgot );
 app.get( '/reset/:token', userController.getReset );
 app.post( '/reset/:token', userController.postReset );
 
-app.get( '/signUp', userController.getSignup );
 app.post( '/signup', userController.postSignup );
 
 app.get( '/contact', contactController.getContact );
