@@ -32,22 +32,18 @@ export const postLogin = async ( req: Request, res: Response, next: NextFunction
   const errors = validationResult( req );
 
   if ( !errors.isEmpty() ) {
-    return res.status( 401 ).json( errors.array() );
+    return badAuth( res, errors.array() );
   }
 
   passport.authenticate( 'local', ( err: Error, user: UserDocument, info: IVerifyOptions ) => {
-    if ( err ) { return next( err ); }
+    if ( err ) {return next( err ); }
     if ( !user ) {
-      return res.status( 401 ).json( [ { msg : info.message } ] );
+      return badAuth( res, [ { msg : info.message } ] );
     }
 
     req.logIn( user, ( err ) => {
       if ( err ) { return next( err ); }
-      const token = jwt.sign( { id : user.email }, 'secret' );
-      res.status( 200 ).send( {
-        token,
-        msg : 'User found and logged'
-      } );
+      return sendJwt( res, user );
     } );
   } )( req, res, next );
 };

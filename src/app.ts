@@ -1,10 +1,8 @@
 import bluebird from 'bluebird';
 import bodyParser from 'body-parser';
 import compression from 'compression'; // compresses requests
-import mongo from 'connect-mongo';
 import cors from 'cors';
 import express from 'express';
-import session from 'express-session';
 import lusca from 'lusca';
 import mongoose from 'mongoose';
 import passport from 'passport';
@@ -17,9 +15,9 @@ import * as contactController from './controllers/contact';
 import * as homeController from './controllers/home';
 // Controllers (route handlers)
 import * as userController from './controllers/user';
-import { MONGODB_URI, SESSION_SECRET } from './util/secrets';
+import { MONGODB_URI } from './util/secrets';
 
-const MongoStore = mongo( session );
+//const MongoStore = mongo( session );
 
 // Create Express server
 const app = express();
@@ -51,38 +49,23 @@ app.set( 'view engine', 'pug' );
 app.use( compression() );
 app.use( bodyParser.json() );
 app.use( bodyParser.urlencoded( { extended : true } ) );
-app.use( session( {
-  resave            : true,
-  saveUninitialized : true,
-  secret            : SESSION_SECRET,
-  store             : new MongoStore( {
-    url           : mongoUrl,
-    autoReconnect : true
-  } )
-} ) );
+//app.use( session( {
+//  resave            : true,
+//  saveUninitialized : true,
+//  secret            : SESSION_SECRET,
+//  store             : new MongoStore( {
+//    url           : mongoUrl,
+//    autoReconnect : true
+//  } )
+//} ) );
 app.use( passport.initialize() );
-app.use( passport.session() );
+//app.use( passport.session() );
 app.use( lusca.xframe( 'SAMEORIGIN' ) );
 app.use( lusca.xssProtection( true ) );
 
 // here the user is accessible in the vue
 app.use( ( req, res, next ) => {
-  res.locals.user = req.user;
-  next();
-} );
-
-app.use( ( req, res, next ) => {
-  // After successful login, redirect back to the intended page
-  if ( !req.user &&
-    req.path !== '/login' &&
-    req.path !== '/signup' &&
-    !req.path.match( /^\/auth/ ) &&
-    !req.path.match( /\./ ) ) {
-    req.session.returnTo = req.path;
-  } else if ( req.user &&
-    req.path == '/account' ) {
-    req.session.returnTo = req.path;
-  }
+  //res.locals.user = req.user;
   next();
 } );
 
@@ -107,7 +90,10 @@ app.get( '/reset/:token', userController.getReset );
 app.post( '/reset/:token', userController.postReset );
 
 app.post( '/signUp', userController.postSignUp );
-app.post( '/isLogged', passportConfig.isAuthenticated, ( req, res ) => res.status( 200 ) );
+app.post( '/isLogged', passportConfig.isAuthenticated, ( req, res ) => {
+ console.log('Is Logged')
+  res.status( 200 ).send()
+} );
 
 app.get( '/contact', contactController.getContact );
 app.post( '/contact', contactController.postContact );

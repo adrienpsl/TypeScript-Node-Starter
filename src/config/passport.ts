@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { NextFunction, Request, Response } from 'express';
-import _ from 'lodash';
 import passport from 'passport';
 import passportFacebook from 'passport-facebook';
 import passportJwt from 'passport-jwt';
@@ -8,7 +7,7 @@ import passportJwt from 'passport-jwt';
 import passportLocal from 'passport-local';
 // import passportOAuth                    from "passport-oauth"
 // import { User, UserType } from '../models/User';
-import { User, UserDocument } from '../models/User';
+import { User } from '../models/User';
 import { CLIENT_ID, CLIENT_SECRET } from '../util/secrets';
 
 const OAuth2Strategy = require( 'passport-oauth' ).OAuth2Strategy;
@@ -29,7 +28,7 @@ passport.deserializeUser( ( id, done ) => {
 /**
  * Sign in using Email and Password.
  */
-passport.use( new LocalStrategy( { usernameField : 'email', session : false }, ( email, password, done ) => {
+passport.use( 'local', new LocalStrategy( { usernameField : 'email', session : false }, ( email, password, done ) => {
   User.findOne( { email : email.toLowerCase() }, ( err, user: any ) => {
     if ( err ) { return done( err ); }
     if ( !user ) {
@@ -167,22 +166,34 @@ passport.use( '42OAuth', new OAuth2Strategy( {
  * Login Required middleware.
  */
 export const isAuthenticated = ( req: Request, res: Response, next: NextFunction ) => {
-  if ( req.isAuthenticated() ) {
-    return next();
-  }
-  res.redirect( '/login' );
+
+  passport.authenticate( 'jwt', { session : false }, function ( err, user, info ) {
+    console.log(req.body)
+    console.log( { info, user } );
+    if ( err ) {
+      console.log( 'error' );
+      next();
+    }
+    next()
+  } )( req, res, next );
+
+  //if ( req.isAuthenticated() ) {
+  //  return next();
+  //}
+  //res.redirect( '/login' );
 };
 
 /**
  * Authorization Required middleware.
  */
 export const isAuthorized = ( req: Request, res: Response, next: NextFunction ) => {
-  const provider = req.path.split( '/' ).slice( -1 )[ 0 ];
-
-  const user = req.user as UserDocument;
-  if ( _.find( user.tokens, { kind : provider } ) ) {
-    next();
-  } else {
-    res.redirect( `/auth/${ provider }` );
-  }
+  //const provider = req.path.split( '/' ).slice( -1 )[ 0 ];
+  //
+  //const user = req.user as UserDocument;
+  //if ( _.find( user.tokens, { kind : provider } ) ) {
+  //  next();
+  //} else {
+  //  res.redirect( `/auth/${ provider }` );
+  //}
+  next();
 };
