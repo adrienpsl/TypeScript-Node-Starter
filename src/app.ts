@@ -2,8 +2,8 @@ import bluebird from 'bluebird';
 import bodyParser from 'body-parser';
 import compression from 'compression'; // compresses requests
 import mongo from 'connect-mongo';
+import cors from 'cors';
 import express from 'express';
-import flash from 'express-flash';
 import session from 'express-session';
 import lusca from 'lusca';
 import mongoose from 'mongoose';
@@ -23,6 +23,14 @@ const MongoStore = mongo( session );
 
 // Create Express server
 const app = express();
+
+//app.use( function ( req, res, next ) {
+//  res.header( 'Access-Control-Allow-Origin', 'http://localhost:3002/' );
+//  res.header( 'Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept' );
+//  next();
+//} );
+
+app.use( cors() );
 
 // Connect to MongoDB
 const mongoUrl = MONGODB_URI;
@@ -98,7 +106,8 @@ app.post( '/forgot', userController.postForgot );
 app.get( '/reset/:token', userController.getReset );
 app.post( '/reset/:token', userController.postReset );
 
-app.post( '/signup', userController.postSignup );
+app.post( '/signUp', userController.postSignUp );
+app.post( '/isLogged', passportConfig.isAuthenticated, ( req, res ) => res.status( 200 ) );
 
 app.get( '/contact', contactController.getContact );
 app.post( '/contact', contactController.postContact );

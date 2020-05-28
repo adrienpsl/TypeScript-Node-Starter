@@ -3,6 +3,7 @@ import axios from 'axios';
 import crypto from 'crypto';
 import { NextFunction, Request, Response } from 'express';
 import { check, sanitize, validationResult } from 'express-validator';
+import jwt from 'jsonwebtoken';
 import { WriteError } from 'mongodb';
 import nodemailer from 'nodemailer';
 import passport from 'passport';
@@ -11,6 +12,13 @@ import '../config/passport';
 import { AuthToken, User, UserDocument } from '../models/User';
 import { CLIENT_ID, CLIENT_SECRET } from '../util/secrets';
 
+const badAuth = ( res: Response, errors: any[] ) => res.status( 401 ).json( { errors : errors } );
+const sendJwt = ( res: Response, user: UserDocument ) => {
+  const token = jwt.sign( { id : user.email }, 'secret' );
+  res.status( 200 ).json( {
+    data : { msg : 'User logged', token }
+  } );
+};
 /**
  * POST /login
  * Sign in using email and password.
@@ -30,13 +38,16 @@ export const postLogin = async ( req: Request, res: Response, next: NextFunction
   passport.authenticate( 'local', ( err: Error, user: UserDocument, info: IVerifyOptions ) => {
     if ( err ) { return next( err ); }
     if ( !user ) {
-      console.log( req.body );
       return res.status( 401 ).json( [ { msg : info.message } ] );
     }
 
     req.logIn( user, ( err ) => {
       if ( err ) { return next( err ); }
-      res.status( 200 ).json( [ { msg : 'User logged' } ] );
+      const token = jwt.sign( { id : user.email }, 'secret' );
+      res.status( 200 ).send( {
+        token,
+        msg : 'User found and logged'
+      } );
     } );
   } )( req, res, next );
 };
@@ -45,7 +56,7 @@ export const postLogin = async ( req: Request, res: Response, next: NextFunction
  * POST /signup
  * Create a new local account.
  */
-export const postSignup = async ( req: Request, res: Response, next: NextFunction ) => {
+export const postSignUp = async ( req: Request, res: Response, next: NextFunction ) => {
   await check( 'email', 'Email is not valid' ).isEmail().run( req );
   await check( 'password', 'Password must be at least 4 characters long' ).isLength( { min : 4 } )
                                                                           .run( req );
@@ -56,9 +67,7 @@ export const postSignup = async ( req: Request, res: Response, next: NextFunctio
   const errors = validationResult( req );
 
   if ( !errors.isEmpty() ) {
-    res.status( 401 );
-    res.json( errors.array() );
-    return;
+    return badAuth( res, errors.array() );
   }
 
   const user = new User( {
@@ -72,7 +81,7 @@ export const postSignup = async ( req: Request, res: Response, next: NextFunctio
 
     if ( err ) { return next( err ); }
     if ( existingUser ) {
-      return res.status( 401 ).json( [ { msg : 'User exist' } ] );
+      return badAuth( res, [ { msg : 'User exist' } ] );
     }
 
     user.save( ( err ) => {
@@ -81,7 +90,8 @@ export const postSignup = async ( req: Request, res: Response, next: NextFunctio
         if ( err ) {
           return next( err );
         }
-        return res.status( 200 ).json( [ { msg : 'User Logged' } ] );
+
+        return sendJwt( res, user );
       } );
     } );
   } );
