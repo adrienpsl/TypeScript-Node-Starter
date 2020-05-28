@@ -58,8 +58,8 @@ describe( 'Test sign In', () => {
 describe( 'Test if I can auth with the token', function () {
   let token;
 
-  beforeEach( cb => {
-    startRequest( route )
+  beforeAll( cb => {
+    return startRequest( route )
       .send( { email : 'bitebite@gmail.com', password : 'bitebite' } )
       .end( ( err, res ) => {
         token = res.body.data.token;
@@ -68,9 +68,15 @@ describe( 'Test if I can auth with the token', function () {
   } );
 
   it( 'should be auth', function () {
-    startRequest( route )
+    return startRequest( '/isLogged' )
       .send( { auth_token : token } )
       .expect( 200 );
+  } );
+
+  it( 'should not be auth', function () {
+    return startRequest( '/isLogged' )
+      .send( { auth_token : token + 'a' } )
+      .expect( 401);
   } );
 
 } );

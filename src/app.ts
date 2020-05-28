@@ -91,8 +91,10 @@ app.post( '/reset/:token', userController.postReset );
 
 app.post( '/signUp', userController.postSignUp );
 app.post( '/isLogged', passportConfig.isAuthenticated, ( req, res ) => {
- console.log('Is Logged')
-  res.status( 200 ).send()
+  console.log( 'Is Logged' );
+  res.status( 200 ).send( {
+    ok : true
+  } );
 } );
 
 app.get( '/contact', contactController.getContact );

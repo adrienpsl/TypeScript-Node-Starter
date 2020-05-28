@@ -48,11 +48,11 @@ const JwtStrategy = passportJwt.Strategy;
 const ExtractJwt = passportJwt.ExtractJwt;
 
 passport.use( 'jwt', new JwtStrategy( {
-  jwtFromRequest : ExtractJwt.fromAuthHeaderAsBearerToken(),
+  jwtFromRequest : ExtractJwt.fromBodyField( 'auth_token' ),
   secretOrKey    : 'secret'
 }, function ( jwt_payload, done ) {
-  console.log( 'payload ', jwt_payload );
-  User.findOne( { email : jwt_payload.sub }, function ( err, user ) {
+  let a = 1;
+  User.findOne( { email : jwt_payload.id }, function ( err, user ) {
     if ( err ) {
       return done( err, false );
     }
@@ -66,69 +66,85 @@ passport.use( 'jwt', new JwtStrategy( {
 } ) );
 
 /**
- * OAuth Strategy Overview
- *
- * - User is already logged in.
- *   - Check if there is an existing account with a provider id.
- *     - If there is, return an error message. (Account merging not supported)
- *     - Else link new OAuth account with currently logged-in user.
- * - User is not logged in.
- *   - Check if it's a returning user.
- *     - If returning user, sign in and we are done.
- *     - Else check if there is an existing account with user's email.
- *       - If there is, return an error message.
- *       - Else create a new account.
+ * Login Required middleware.
  */
+export const isAuthenticated = ( req: Request, res: Response, next: NextFunction ) => {
 
-/**
- * Sign in with 42.
- */
-passport.use( '42OAuth', new OAuth2Strategy( {
-    clientID         : CLIENT_ID,
-    clientSecret     : CLIENT_SECRET,
-    callbackURL      : 'http://localhost:3000/42auth',
-    authorizationURL : 'https://api.intra.42.fr/oauth/authorize',
-    tokenURL         : 'https://api.intra.42.fr/oauth/token'
-  },
-  async function ( accessToken, refreshToken, profile, done ) {
-
-    try {
-      const getMe = await axios( {
-        url     : 'https://api.intra.42.fr/v2/me',
-        method  : 'GET',
-        headers : { Authorization : `Bearer ${ accessToken }` }
-      } );
-
-      User.findOne( { email : getMe.data.email.toLowerCase() },
-        async ( err, existingUser ) => {
-          if ( err ) {return done( err );}
-
-          if ( existingUser ) {
-            return done( undefined, existingUser );
-          }
-          const newUser = new User( {
-            email  : getMe.data.email,
-            tokens : [ { kind : '42OAuth', accessToken : accessToken } ]
-          } );
-
-          await newUser.save( ( err ) => {
-            if ( err ) {
-              return done( err );
-            }
-            done( err, newUser );
-            // req.login(newUser)
-          } );
-        } );
-      // search if there is user with that:
-
-      // search if that user is :
-
-    } catch ( e ) {
-
+  passport.authenticate( 'jwt', { session : false }, function ( err, user, info ) {
+    if ( err ) {
+      next( err );
+    }
+    if ( !user ) {
+      res.status( 401 ).send( { errors : [ { msg : 'bad token' } ] } );
     }
 
-    // done();
-  } ) );
+    next();
+  } )( req, res, next );
+
+  /**
+   * OAuth Strategy Overview
+   *
+   * - User is already logged in.
+   *   - Check if there is an existing account with a provider id.
+   *     - If there is, return an error message. (Account merging not supported)
+   *     - Else link new OAuth account with currently logged-in user.
+   * - User is not logged in.
+   *   - Check if it's a returning user.
+   *     - If returning user, sign in and we are done.
+   *     - Else check if there is an existing account with user's email.
+   *       - If there is, return an error message.
+   *       - Else create a new account.
+   */
+
+  /**
+   * Sign in with 42.
+   */
+  passport.use( '42OAuth', new OAuth2Strategy( {
+      clientID         : CLIENT_ID,
+      clientSecret     : CLIENT_SECRET,
+      callbackURL      : 'http://localhost:3000/42auth',
+      authorizationURL : 'https://api.intra.42.fr/oauth/authorize',
+      tokenURL         : 'https://api.intra.42.fr/oauth/token'
+    },
+    async function ( accessToken, refreshToken, profile, done ) {
+
+      try {
+        const getMe = await axios( {
+          url     : 'https://api.intra.42.fr/v2/me',
+          method  : 'GET',
+          headers : { Authorization : `Bearer ${ accessToken }` }
+        } );
+
+        User.findOne( { email : getMe.data.email.toLowerCase() },
+          async ( err, existingUser ) => {
+            if ( err ) {return done( err );}
+
+            if ( existingUser ) {
+              return done( undefined, existingUser );
+            }
+            const newUser = new User( {
+              email  : getMe.data.email,
+              tokens : [ { kind : '42OAuth', accessToken : accessToken } ]
+            } );
+
+            await newUser.save( ( err ) => {
+              if ( err ) {
+                return done( err );
+              }
+              done( err, newUser );
+              // req.login(newUser)
+            } );
+          } );
+        // search if there is user with that:
+
+        // search if that user is :
+
+      } catch ( e ) {
+
+      }
+
+      // done();
+    } ) );
 
 ///**
 // * Sign in with Facebook.
@@ -161,21 +177,6 @@ passport.use( '42OAuth', new OAuth2Strategy( {
 // ${ profile.name.familyName }`; user.profile.gender = profile._json.gender; user.profile.picture =
 // `https://graph.facebook.com/${ profile.id }/picture?type=large`; user.profile.location = ( profile._json.location )
 // ? profile._json.location.name : ''; user.save( ( err: Error ) => { done( err, user ); } ); } } ); } ); } } ) );
-
-/**
- * Login Required middleware.
- */
-export const isAuthenticated = ( req: Request, res: Response, next: NextFunction ) => {
-
-  passport.authenticate( 'jwt', { session : false }, function ( err, user, info ) {
-    console.log(req.body)
-    console.log( { info, user } );
-    if ( err ) {
-      console.log( 'error' );
-      next();
-    }
-    next()
-  } )( req, res, next );
 
   //if ( req.isAuthenticated() ) {
   //  return next();
