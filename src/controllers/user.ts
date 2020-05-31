@@ -12,12 +12,10 @@ import '../config/passport';
 import { AuthToken, User, UserDocument } from '../models/User';
 import { CLIENT_ID, CLIENT_SECRET } from '../util/secrets';
 
-const badAuth = ( res: Response, errors: any[] ) => res.status( 401 ).json( { errors : errors } );
-const sendJwt = ( res: Response, user: UserDocument ) => {
+const badAuth = ( res: Response, errors: { msg: string }[] ) => res.status( 401 ).json( errors );
+const sendAuth = ( res: Response, user: UserDocument ) => {
   const token = jwt.sign( { id : user.email }, 'secret' );
-  res.status( 200 ).json( {
-    data : { msg : 'User logged', token }
-  } );
+  res.status( 200 ).json( { msg : 'User logged', token, email : user.email } );
 };
 /**
  * POST /login
@@ -43,7 +41,7 @@ export const postLogin = async ( req: Request, res: Response, next: NextFunction
 
     req.logIn( user, ( err ) => {
       if ( err ) { return next( err ); }
-      return sendJwt( res, user );
+      return sendAuth( res, user );
     } );
   } )( req, res, next );
 };
@@ -76,6 +74,7 @@ export const postSignUp = async ( req: Request, res: Response, next: NextFunctio
   User.findOne( { email : req.body.email }, ( err, existingUser ) => {
 
     if ( err ) { return next( err ); }
+    console.log( existingUser );
     if ( existingUser ) {
       return badAuth( res, [ { msg : 'User exist' } ] );
     }
@@ -87,7 +86,7 @@ export const postSignUp = async ( req: Request, res: Response, next: NextFunctio
           return next( err );
         }
 
-        return sendJwt( res, user );
+        return sendAuth( res, user );
       } );
     } );
   } );
@@ -103,8 +102,10 @@ export const logout = ( req: Request, res: Response ) => {
 };
 
 export const auth = async ( req: Request, res: Response, next: NextFunction ) => {
-  const code = req.query.code;
+  const code = req.body.code;
+
   if ( code ) {
+    console.log( code );
     try {
       const getToken = await axios( {
         url    : 'https://api.intra.42.fr/v2/oauth/token',
@@ -119,23 +120,47 @@ export const auth = async ( req: Request, res: Response, next: NextFunction ) =>
       } );
 
       const { data } = getToken;
+      console.log( data );
 
-      if ( !data ) {
-        throw new Error( 'bad cred' );
-      }
+      //if ( !data ) {
+      //  return badAuth( res, [ { msg : 'bad cred' } ] );
+      //}
+      //
+      //const getMe = await axios( {
+      //  url     : 'https://api.intra.42.fr/v2/me',
+      //  method  : 'GET',
+      //  headers : { Authorization : `Bearer ${ data.access_token }` }
+      //} );
+      //
+      //User.findOne( { email : getMe.data.email.toLowerCase() },
+      //  async ( err, existingUser ) => {
+      //    if ( err ) {
+      //      return res.json( err );
+      //    }
+      //
+      //    if ( existingUser ) {
+      //      return sendAuth( res, existingUser );
+      //    }
+      //
+      //    const newUser = new User( {
+      //      email  : getMe.data.email,
+      //      tokens : [ { kind : '42OAuth', accessToken : data.accessToken } ]
+      //    } );
+      //
+      //    await newUser.save( ( err ) => {
+      //      if ( err ) {
+      //        return res.json( err );
+      //      }
+      //      sendAuth( res, newUser );
+      //      // req.login(newUser)
+      //    } );
+      //
+      //  } );
+      //
+      //return sendAuth( res, user );
 
-      const getMe = await axios( {
-        url     : 'https://api.intra.42.fr/v2/me',
-        method  : 'GET',
-        headers : { Authorization : `Bearer ${ data.access_token }` }
-      } );
-
-      console.log( getMe.data.email );
-      console.log( req.user );
-      // check if there is an user with that email
-
-    } catch ( e ) {
-      console.log( e );
+    } catch ( { response } ) {
+      console.log( response.data );
     }
 
   }

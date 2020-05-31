@@ -80,7 +80,7 @@ app.get( '/', homeController.index );
 
 //app.get( '/login', userController.getLogin );
 //app.get( '/loginStart', userController.getLoginStart );
-app.post( '/login', userController.postLogin );
+app.post( '/signIn', userController.postLogin );
 
 app.get( '/logout', userController.logout );
 
@@ -90,12 +90,6 @@ app.get( '/reset/:token', userController.getReset );
 app.post( '/reset/:token', userController.postReset );
 
 app.post( '/signUp', userController.postSignUp );
-app.post( '/isLogged', passportConfig.isAuthenticated, ( req, res ) => {
-  console.log( 'Is Logged' );
-  res.status( 200 ).send( {
-    ok : true
-  } );
-} );
 
 app.get( '/contact', contactController.getContact );
 app.post( '/contact', contactController.postContact );
@@ -135,7 +129,7 @@ app.get( '/42auth',
   } ) );
 
 app.get( 'authOK', ( res, req ) => req.send( 'toto' ) );
-app.get( '/42auth', userController.auth );
+app.post( '/auth42', userController.auth );
 
 // founder
 app.get( '/searchFounder', airtableFormController.searchFounder );

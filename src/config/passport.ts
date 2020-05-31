@@ -1,19 +1,14 @@
 import axios from 'axios';
 import { NextFunction, Request, Response } from 'express';
 import passport from 'passport';
-import passportFacebook from 'passport-facebook';
 import passportJwt from 'passport-jwt';
-//import { ExtractJWT, JwtStrategy } from 'passport-jwt';
 import passportLocal from 'passport-local';
-// import passportOAuth                    from "passport-oauth"
-// import { User, UserType } from '../models/User';
 import { User } from '../models/User';
 import { CLIENT_ID, CLIENT_SECRET } from '../util/secrets';
 
 const OAuth2Strategy = require( 'passport-oauth' ).OAuth2Strategy;
 
 const LocalStrategy = passportLocal.Strategy;
-const FacebookStrategy = passportFacebook.Strategy;
 
 passport.serializeUser<any, any>( ( user, done ) => {
   done( undefined, user.id );
@@ -80,71 +75,73 @@ export const isAuthenticated = ( req: Request, res: Response, next: NextFunction
 
     next();
   } )( req, res, next );
+};
 
-  /**
-   * OAuth Strategy Overview
-   *
-   * - User is already logged in.
-   *   - Check if there is an existing account with a provider id.
-   *     - If there is, return an error message. (Account merging not supported)
-   *     - Else link new OAuth account with currently logged-in user.
-   * - User is not logged in.
-   *   - Check if it's a returning user.
-   *     - If returning user, sign in and we are done.
-   *     - Else check if there is an existing account with user's email.
-   *       - If there is, return an error message.
-   *       - Else create a new account.
-   */
+/**
+ * OAuth Strategy Overview
+ *
+ * - User is already logged in.
+ *   - Check if there is an existing account with a provider id.
+ *     - If there is, return an error message. (Account merging not supported)
+ *     - Else link new OAuth account with currently logged-in user.
+ * - User is not logged in.
+ *   - Check if it's a returning user.
+ *     - If returning user, sign in and we are done.
+ *     - Else check if there is an existing account with user's email.
+ *       - If there is, return an error message.
+ *       - Else create a new account.
+ */
 
-  /**
-   * Sign in with 42.
-   */
-  passport.use( '42OAuth', new OAuth2Strategy( {
-      clientID         : CLIENT_ID,
-      clientSecret     : CLIENT_SECRET,
-      callbackURL      : 'http://localhost:3000/42auth',
-      authorizationURL : 'https://api.intra.42.fr/oauth/authorize',
-      tokenURL         : 'https://api.intra.42.fr/oauth/token'
-    },
-    async function ( accessToken, refreshToken, profile, done ) {
+/**
+ * Sign in with 42.
+ */
+passport.use( '42OAuth', new OAuth2Strategy( {
+    clientID         : CLIENT_ID,
+    clientSecret     : CLIENT_SECRET,
+    callbackURL      : 'http://localhost:3000/42auth',
+    authorizationURL : 'https://api.intra.42.fr/oauth/authorize',
+    tokenURL         : 'https://api.intra.42.fr/oauth/token'
+  },
+  async function ( accessToken, refreshToken, profile, done ) {
 
-      try {
-        const getMe = await axios( {
-          url     : 'https://api.intra.42.fr/v2/me',
-          method  : 'GET',
-          headers : { Authorization : `Bearer ${ accessToken }` }
-        } );
+    try {
+      const getMe = await axios( {
+        url     : 'https://api.intra.42.fr/v2/me',
+        method  : 'GET',
+        headers : { Authorization : `Bearer ${ accessToken }` }
+      } );
 
-        User.findOne( { email : getMe.data.email.toLowerCase() },
-          async ( err, existingUser ) => {
-            if ( err ) {return done( err );}
+      User.findOne( { email : getMe.data.email.toLowerCase() },
+        async ( err, existingUser ) => {
+          if ( err ) {return done( err );}
 
-            if ( existingUser ) {
-              return done( undefined, existingUser );
-            }
-            const newUser = new User( {
-              email  : getMe.data.email,
-              tokens : [ { kind : '42OAuth', accessToken : accessToken } ]
-            } );
+          if ( existingUser ) {
+            return done( undefined, existingUser );
+          }
 
-            await newUser.save( ( err ) => {
-              if ( err ) {
-                return done( err );
-              }
-              done( err, newUser );
-              // req.login(newUser)
-            } );
+          const newUser = new User( {
+            email  : getMe.data.email,
+            tokens : [ { kind : '42OAuth', accessToken : accessToken } ]
           } );
-        // search if there is user with that:
 
-        // search if that user is :
+          await newUser.save( ( err ) => {
+            if ( err ) {
+              return done( err );
+            }
+            done( err, newUser );
+            // req.login(newUser)
+          } );
+        } );
+      // search if there is user with that:
 
-      } catch ( e ) {
+      // search if that user is :
 
-      }
+    } catch ( e ) {
 
-      // done();
-    } ) );
+    }
+
+    done();
+  } ) );
 
 ///**
 // * Sign in with Facebook.
@@ -178,11 +175,10 @@ export const isAuthenticated = ( req: Request, res: Response, next: NextFunction
 // `https://graph.facebook.com/${ profile.id }/picture?type=large`; user.profile.location = ( profile._json.location )
 // ? profile._json.location.name : ''; user.save( ( err: Error ) => { done( err, user ); } ); } } ); } ); } } ) );
 
-  //if ( req.isAuthenticated() ) {
-  //  return next();
-  //}
-  //res.redirect( '/login' );
-};
+//if ( req.isAuthenticated() ) {
+//  return next();
+//}
+//res.redirect( '/login' );
 
 /**
  * Authorization Required middleware.

@@ -76,7 +76,7 @@ describe( 'Test if I can auth with the token', function () {
   it( 'should not be auth', function () {
     return startRequest( '/isLogged' )
       .send( { auth_token : token + 'a' } )
-      .expect( 401);
+      .expect( 401 );
   } );
 
 } );
