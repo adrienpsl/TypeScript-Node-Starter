@@ -74,7 +74,7 @@ export const postSignUp = async ( req: Request, res: Response, next: NextFunctio
   User.findOne( { email : req.body.email }, ( err, existingUser ) => {
 
     if ( err ) { return next( err ); }
-    console.log( existingUser );
+
     if ( existingUser ) {
       return badAuth( res, [ { msg : 'User exist' } ] );
     }
@@ -97,80 +97,80 @@ export const postSignUp = async ( req: Request, res: Response, next: NextFunctio
  * Log out.
  */
 export const logout = ( req: Request, res: Response ) => {
-  req.logout();
   res.redirect( '/' );
 };
 
+/**
+ * POST /42auth
+ * 42 auth
+ */
 export const auth = async ( req: Request, res: Response, next: NextFunction ) => {
   const code = req.body.code;
 
-  if ( code ) {
-    console.log( code );
-    try {
-      const getToken = await axios( {
-        url    : 'https://api.intra.42.fr/v2/oauth/token',
-        method : 'POST',
-        params : {
-          grant_type    : 'authorization_code',
-          client_id     : CLIENT_ID,
-          client_secret : CLIENT_SECRET,
-          code,
-          redirect_uri  : 'http://localhost:3000/42auth'
-        }
-      } );
+  if ( !code ) {
+    return badAuth( res, [ { msg : 'Bad auth' } ] );
+  }
 
-      const { data } = getToken;
-      console.log( data );
+  try {
 
-      //if ( !data ) {
-      //  return badAuth( res, [ { msg : 'bad cred' } ] );
-      //}
-      //
-      //const getMe = await axios( {
-      //  url     : 'https://api.intra.42.fr/v2/me',
-      //  method  : 'GET',
-      //  headers : { Authorization : `Bearer ${ data.access_token }` }
-      //} );
-      //
-      //User.findOne( { email : getMe.data.email.toLowerCase() },
-      //  async ( err, existingUser ) => {
-      //    if ( err ) {
-      //      return res.json( err );
-      //    }
-      //
-      //    if ( existingUser ) {
-      //      return sendAuth( res, existingUser );
-      //    }
-      //
-      //    const newUser = new User( {
-      //      email  : getMe.data.email,
-      //      tokens : [ { kind : '42OAuth', accessToken : data.accessToken } ]
-      //    } );
-      //
-      //    await newUser.save( ( err ) => {
-      //      if ( err ) {
-      //        return res.json( err );
-      //      }
-      //      sendAuth( res, newUser );
-      //      // req.login(newUser)
-      //    } );
-      //
-      //  } );
-      //
-      //return sendAuth( res, user );
+    const getTokenResponse = await axios( {
+      url    : 'https://api.intra.42.fr/oauth/token',
+      method : 'POST',
+      params : {
+        grant_type    : 'authorization_code',
+        client_id     : CLIENT_ID,
+        client_secret : CLIENT_SECRET,
+        code,
+        redirect_uri  : 'http://localhost:3000/42auth'
+      }
+    } );
 
-    } catch ( { response } ) {
-      console.log( response.data );
+    const { data } = getTokenResponse;
+    const { access_token } = data;
+
+    if ( !data || !access_token ) {
+      return badAuth( res, [ { msg : 'Bad auth' } ] );
     }
 
-  }
-  return res.send( 'ok' );
-};
+    const getMeResponse = await axios( {
+      url     : 'https://api.intra.42.fr/v2/me',
+      method  : 'GET',
+      headers : { Authorization : `Bearer ${ access_token }` }
+    } );
 
-//
-//
-//
-//
+    if ( !getMeResponse || !getMeResponse.data || !getMeResponse.data.email ) {
+      return badAuth( res, [ { msg : 'Bad auth' } ] );
+    }
+    const email = getMeResponse.data.email.toLowerCase();
+
+    User.findOne( { email },
+      async ( err, existingUser ) => {
+        if ( err ) {
+          return res.json( err );
+        }
+
+        if ( existingUser ) {
+          return sendAuth( res, existingUser );
+        }
+
+        const newUser = new User( {
+          email  : email,
+          tokens : [ { kind : '42OAuth', accessToken : access_token } ]
+        } );
+
+        await newUser.save( ( err ) => {
+          if ( err ) {
+            return res.json( err );
+          }
+          sendAuth( res, newUser );
+        } );
+
+      } );
+
+  } catch ( { response } ) {
+    return badAuth( res, [ { msg : 'Bad auth' } ] );
+  }
+};
 
 /**
  * GET /account
