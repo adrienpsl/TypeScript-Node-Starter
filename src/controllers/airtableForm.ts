@@ -2,8 +2,8 @@ import { NextFunction, Request, Response } from 'express';
 import mongoose from 'mongoose';
 import { UserDocument, userSchema } from '../models/User';
 
-//
-//
+var Airtable = require( 'airtable' );
+var base = new Airtable( { apiKey : 'key8EKlpBqSNuNdUU' } ).base( 'appbotRNHtnfDI7o9' );
 
 const User = mongoose.model<UserDocument>( 'User', userSchema );
 
@@ -50,9 +50,6 @@ export const formValidateStartup = ( req: Request, res: Response, next: NextFunc
   return res.redirect( '/' );
 };
 
-const Airtable = require( 'airtable' );
-const base = new Airtable( { apiKey : 'key8EKlpBqSNuNdUU' } ).base( 'appbotRNHtnfDI7o9' );
-
 export const searchFounder = ( req: Request, res: Response, next: NextFunction ) => {
 
   const data: any[] = [];
@@ -84,3 +81,39 @@ export const searchFounder = ( req: Request, res: Response, next: NextFunction )
 
 };
 
+export const getFields = async ( req: Request, res: Response, next: NextFunction ) => {
+  const { type } = req.body;
+
+  if ( type === 'founderForm' ) {
+    try {
+      const sectorsRecords = await base( 'SECTORS' ).select( { fields : [ 'Name' ] } ).all();
+      const sectors = sectorsRecords.map( data => data.fields[ 'Name' ] );
+
+      const yourSkillsRecords = await base( 'What are your skills?' ).select( { fields : [ 'Name' ] } ).all();
+      const yourSkills = yourSkillsRecords.map( data => data.fields[ 'Name' ] );
+
+      const searchedSkillsRecords = await base( 'What are your skills?' ).select( { fields : [ 'Name' ] } ).all();
+      const searchedSkills = searchedSkillsRecords.map( data => data.fields[ 'Name' ] );
+
+      res.json( { sectors, yourSkills, searchedSkills } );
+    } catch ( e ) {
+      res.json( [ { msg : e.toString() } ] );
+    }
+  }
+};
+
+export const formBuilder = async ( req: Request, res: Response, next: NextFunction ) => {
+  const { type } = req.body;
+
+  if ( type === 'founderForm' ) {
+    try {
+      const searchedSkillsRecords = await base( 'FOUNDERS' ).select().all();
+      const searchedSkills = searchedSkillsRecords.map( data => data.fields );
+      const res = searchedSkills.filter( ( { Name } ) => Name === 'first_line' );
+
+      res.json( { searchedSkills } );
+    } catch ( e ) {
+      res.json( [ { msg : e.toString() } ] );
+    }
+  }
+};

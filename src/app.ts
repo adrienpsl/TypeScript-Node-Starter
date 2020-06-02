@@ -120,6 +120,9 @@ app.get( '/auth/facebook/callback', passport.authenticate( 'facebook', { failure
 //app.get("/formDirection", airtableFormController.formDirection);
 //app.get("/formValidateStartup", airtableFormController.formValidateStartup);
 
+app.post( '/getFields', airtableFormController.getFields );
+app.post( '/formBuilder', airtableFormController.formBuilder );
+
 app.get( '/42', passport.authenticate( '42OAuth' ) );
 app.get( '/42auth',
   passport.authenticate( '42OAuth', {
